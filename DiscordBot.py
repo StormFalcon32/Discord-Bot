@@ -311,7 +311,8 @@ async def stats(ctx, *args):
 
 @client.event
 async def on_message(message):
-    await client.process_commands(message)
+    ctx = await client.get_context(message)
+    await client.invoke(ctx)
     if message.author == client.user or message.channel.id != 606322549139308544:
         return
     emoji = '💪🏿'
