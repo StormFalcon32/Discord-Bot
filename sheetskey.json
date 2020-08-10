@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "discord-bot-274522",
+  "private_key_id": "fc5806e934e73463c10c5af6256c400c394edee9",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCuc0KM7MwU9XBh\nGGQ30utyAlwOlzUd+3pGcx5X4a8QNXl+3IjsQgJyg1vfFz/uV/OdhH+S8gNqFlH7\nULDfF5Ys3AUExv5Jb6t/JQXs3TczAYLsP6CGcf7IXysCMlyG4DoRmUPs27/hx8QO\nRDJ8skcFM8qcmXWgAQhwqM4cZUo9MoYHuNMnrRYD4a1E9dPzeoOoLWV0fQUVG+4a\nflaUX2O0gQehWizzrsu9s+A8Si2SOMW15WBXQbByEdCQpd80WFJNrYSDGcIwgP4K\n5WWWixDg0uO3SLhvG7iml2iY0xkFakYUDDISR4f5HLa4plDqMjmovf7HjIrzHXxi\nRfUvcI3FAgMBAAECggEACAyGkb//O1xTshDEPWGJV+Czl9mMK6gsIE7OPWaXtpsk\nOIehkN0Ln3Ysgy+S1VydGRoOIZzyLi8XdNpocfKoDPid1qmW/ZM3o3P1QQeEtRRc\nLEOHR/MmIUXOBmaFp5RC7NSLsl41QHKaIVphX48bAPdxx4xURZ/ZxtdTCZmQaLn1\n7Jfht4bFzMqrv8mZi9fY4kwQfBLyb9IoOUJfQZUChmFpBeMdAQgnCtHV+gQ+7Cc9\nYIaNAZcDxLj5n1vYPndtpA+Dya4sz1lhbGy59m2aKQQz0yN4+rjpTWNJT6ZVEgJg\nrI6MexBM0QGjz7HKDuhSYrHwehjib8lb0MW0Y0XJhQKBgQDcsSaDrl+0ZAvYE5cC\n3/QcBsX6CEWYxbn9j+W9lnddzW157is7w4VUQVmo0sTxAyxLRHnoq0yv0gMDc48g\n5PS582rteopQqMiuFLYJpXx1ooqFSd6otRbTxGw6Wa8XmILVAB7y2xh24v1WVcqs\nYuPo7Bz4SFyUmfN4p+kYhCekgwKBgQDKXDFLttOpN6Cv63pfCIlXG/bwjMqoRSxC\npRh1+skCybRKuWt8BWCtQ+S001h9UzaLSyz+L+0H5P6AAmXViCg0Tw3+eTbc3uNw\n+rF34kLcUAxBbWOd/hirQRv3j4PIGPMRMhB63fxl/jnsxxjswPH+DgdzkmRSm0kI\n0ENU1v1CFwKBgHGFEkmj9YjF+a2xDfmll1yfQ1EE1j/qXWyHi2aFMmtm0wxoLYb1\nYOzhHKyRlkpfFna1B3xeOPkrru8kjxgdjaDlDDiR0voAiBG7h5PYsveTn2tGfykK\n1W4i2IT/QuiBQ7Mq98B2YNQumJ/DS5h22cMjSReRqUWrFykWPfmlaPrfAoGBAMnK\nv5m6Gj3PbByhnGjyMUq9ZzWfoGPGfwmCau8Tg6mVDIXLeyS0lCCT6JhtfPuUpHqp\nH5fmoN7TevqZ6YTS/wySnOjbZVtBpNrAE4LyDSx3YpFIDSO7BEyaY9ItugMq5hCK\ntSZhAVWP+6FjNTa6fVaUFNgp7oL1uRHh5JLQxMJHAoGAZMB5yjGderx9yu2VqHzP\ndZjJB4/LIUGDo87/I2h8XbJMkdxDUq24HOqPoveVxZ+v/Y5SBFySOnzBeyFZbeLr\nQ3d5Gx3e8JiV9eCmXsbCd2Oo8C/r98PzKSpXbTWnkN5FWYxr+jGKp9zqnFtMK+0k\nm6OPWQQ4zHLknqwByve0+6I=\n-----END PRIVATE KEY-----\n",
+  "client_email": "tangseng@discord-bot-274522.iam.gserviceaccount.com",
+  "client_id": "104811960068508667231",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tangseng%40discord-bot-274522.iam.gserviceaccount.com"
+}
