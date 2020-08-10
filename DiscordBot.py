@@ -13,21 +13,49 @@ sheet = sheets_client.open('Discord')
 
 client = commands.Bot(command_prefix='!')
 
-started_draft = False
-picked_caps = False
-eligible_players = []
-eligible_caps = []
-draft_pool = []
-caps_pool = []
-draft_teams = [[], []]
-current_team = 0
-
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 @client.command()
-async def show_teams(ctx):
+async def save_text(ctx, *args):
+    author_id = str(ctx.message.author.id)
+    save_data = ' '.join(args)
+    text_sheet = sheet.worksheet('Text')
+    all_data = text_sheet.get_all_values()[1:]
+    ids = [row[0] for row in all_data]
+    if author_id not in ids:
+        text_sheet.append_row([author_id, save_data])
+        await ctx.send('Added new user with text: {}'.format(save_data))
+        return
+    row = 2
+    for user_id in ids:
+        if user_id == author_id:
+            text_sheet.update_cell(row, 2, save_data)
+            break
+        row += 1
+    await ctx.send('Updated text to {}'.format(save_data))
+
+@client.command()
+async def get_text(ctx, *args):
+    author_id = str(ctx.message.author.id)
+    if args:
+        author_id = args[0]
+    text_sheet = sheet.worksheet('Text')
+    all_data = text_sheet.get_all_values()[1:]
+    ids = [row[0] for row in all_data]
+    if author_id not in ids:
+        await ctx.send('This user has not saved anything, did you get the right ID?')
+        return
+    row = 2
+    for user_id in ids:
+        if user_id == author_id:
+            await ctx.send(all_data[row - 2][1])
+            break
+        row += 1
+
+@client.command()
+async def get_teams(ctx):
     teams = sheet.worksheet('Teams').get_all_values()
     await ctx.send('\n'.join([', '.join(row) for row in teams]))
 
@@ -186,7 +214,7 @@ async def remove_player(ctx, *args):
 
 
 @client.command()
-@commands.has_role('Head Priest')
+@commands.has_role('Oracle')
 async def remove_record(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
@@ -205,7 +233,7 @@ async def remove_record(ctx, *args):
         row += 1
 
 @client.command()
-@commands.has_role('Head Priest')
+@commands.has_role('Oracle')
 async def win(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
@@ -290,14 +318,14 @@ async def on_message(message):
     await message.add_reaction(emoji)
 
 @client.command()
-@commands.has_role('Head Priest')
+@commands.has_role('Oracle')
 async def kill(ctx):
     await client.logout()
 
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRole):
-        await ctx.send('Only the head priest knows this prayer')
+        await ctx.send('Only the oracle knows this prayer')
     else:
         print(error)
 
