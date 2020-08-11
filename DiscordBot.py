@@ -13,6 +13,15 @@ sheet = sheets_client.open('Discord')
 
 client = commands.Bot(command_prefix='!')
 
+started_draft = False
+picked_caps = False
+eligible_players = []
+eligible_caps = []
+draft_pool = []
+caps_pool = []
+draft_teams = [[], []]
+current_team = 0
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
