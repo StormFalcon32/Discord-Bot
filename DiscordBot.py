@@ -4,6 +4,7 @@ import discord
 import gspread
 from tabulate import tabulate
 from discord.ext import commands
+from discord.utils import get
 from oauth2client.service_account import ServiceAccountCredentials
 
 scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
@@ -342,6 +343,9 @@ async def on_command_error(ctx, error):
 @client.event
 async def on_member_join(member):
     print('{} has joined'.format(member))
+    role = get(member.guild.roles, name='Herald')
+    await member.add_roles(role)
+    await member.send('Welcome! You are a herald, so you only have voice chat permissions. If you are not a stranger, PM someone to get more permissions.')
 
 @client.event
 async def on_member_remove(member):
