@@ -1,16 +1,21 @@
 import random
+import re
 
 import discord
 import gspread
-from tabulate import tabulate
 from discord.ext import commands
 from discord.utils import get
 from oauth2client.service_account import ServiceAccountCredentials
+from tabulate import tabulate
 
 scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
 creds = ServiceAccountCredentials.from_json_keyfile_name('sheetskey.json', scope)
 sheets_client = gspread.authorize(creds)
+
 sheet = sheets_client.open('Discord')
+text_sheet = sheet.worksheet('Text')
+teams_sheet = sheet.worksheet('Teams')
+players_sheet = sheet.worksheet('Players')
 
 client = commands.Bot(command_prefix='!')
 
@@ -23,15 +28,10 @@ caps_pool = []
 draft_teams = [[], []]
 current_team = 0
 
-@client.event
-async def on_ready():
-    print('We have logged in as {0.user}'.format(client))
-
 @client.command()
 async def save_text(ctx, *args):
     author_id = str(ctx.message.author.id)
     save_data = ' '.join(args)
-    text_sheet = sheet.worksheet('Text')
     all_data = text_sheet.get_all_values()[1:]
     ids = [row[0] for row in all_data]
     if author_id not in ids:
@@ -51,7 +51,6 @@ async def get_text(ctx, *args):
     author_id = str(ctx.message.author.id)
     if args:
         author_id = args[0]
-    text_sheet = sheet.worksheet('Text')
     all_data = text_sheet.get_all_values()[1:]
     ids = [row[0] for row in all_data]
     if author_id not in ids:
@@ -66,7 +65,7 @@ async def get_text(ctx, *args):
 
 @client.command()
 async def get_teams(ctx):
-    teams = sheet.worksheet('Teams').get_all_values()
+    teams = teams_sheet.get_all_values()
     await ctx.send('\n'.join([', '.join(row) for row in teams]))
 
 @client.command()
@@ -75,7 +74,7 @@ async def start_draft(ctx):
     global eligible_players
     global eligible_caps
     started_draft = True
-    players = sheet.worksheet('Players').get_all_values()[1:]
+    players = players_sheet.get_all_values()[1:]
     for row in players:
         if row[3] == '0':
             continue
@@ -141,14 +140,11 @@ async def pick(ctx, *args):
     current_team = 1 - current_team
     await ctx.send('{} was picked'.format(pick))
     if not draft_pool or (len(draft_teams[0]) == 4 and len(draft_teams[1]) == 4):
-        await ctx.send('Draft finished, do !show_teams to see new teams')
+        await ctx.send('Draft finished, do !get_teams to see new teams')
         save_teams()
         reset()
 
 def save_teams():
-    sheet.del_worksheet(sheet.worksheet('Teams'))
-    teams_sheet = sheet.add_worksheet(title='Teams', rows=3, cols=4)
-    players_sheet = sheet.worksheet('Players')
     players = players_sheet.get_all_values()[1:]
     names = [player[0] for player in players]
     for i in range(len(draft_teams)):
@@ -181,25 +177,25 @@ def reset():
 
 @client.command()
 async def reset_cap_rotation(ctx):
-    num_players = len(sheet.worksheet('Players').col_values(1)) - 1
+    num_players = len(players_sheet.col_values(1)) - 1
     for player in range(num_players):
-        sheet.worksheet('Players').update_cell(player + 2, 5, 1)
+        players_sheet.update_cell(player + 2, 5, 1)
     await ctx.send('Captain rotation reset. Everyone is now eligible')
 
 @client.command()
 async def add_player(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
-    players = sheet.worksheet('Players').get_all_values()[1:]
+    players = players_sheet.get_all_values()[1:]
     names = [player[0] for player in players]
     if player_name not in names:
-        sheet.worksheet('Players').append_row([player_name, 0, 0, 1, 1, 'N/A', 0, 0])
+        players_sheet.append_row([player_name, 0, 0, 1, 1, 'N/A', 0, 0])
         await ctx.send('{} added to bedwars roster (new player)'.format(player_name))
         return
     row = 2
     for name in names:
         if name == player_name:
-            sheet.worksheet('Players').update_cell(row, 4, 1)
+            players_sheet.update_cell(row, 4, 1)
             await ctx.send('{} added to draft pool'.format(name))
             return
         row += 1
@@ -208,7 +204,7 @@ async def add_player(ctx, *args):
 async def remove_player(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
-    players = sheet.worksheet('Players').get_all_values()[1:]
+    players = players_sheet.get_all_values()[1:]
     names = [player[0] for player in players]
     if player_name not in names:
         await ctx.send('Not a valid player to remove from draft pool, here is a list')
@@ -217,7 +213,7 @@ async def remove_player(ctx, *args):
     row = 2
     for name in names:
         if name == player_name:
-            sheet.worksheet('Players').update_cell(row, 4, 0)
+            players_sheet.update_cell(row, 4, 0)
             await ctx.send('{} removed from draft pool'.format(name))
             return
         row += 1
@@ -228,7 +224,7 @@ async def remove_player(ctx, *args):
 async def remove_record(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
-    players = sheet.worksheet('Players').get_all_values()[1:]
+    players = players_sheet.get_all_values()[1:]
     names = [player[0] for player in players]
     if player_name not in names:
         await ctx.send('Not a valid player to delete from bedwars roster, here is a list')
@@ -237,7 +233,7 @@ async def remove_record(ctx, *args):
     row = 2
     for name in names:
         if name == player_name:
-            sheet.worksheet('Players').delete_row(row)
+            players_sheet.delete_row(row)
             await ctx.send('{} removed from bedwars roster'.format(name))
             return
         row += 1
@@ -247,9 +243,8 @@ async def remove_record(ctx, *args):
 async def win(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
-    players_sheet = sheet.worksheet('Players')
     players = players_sheet.get_all_values()[1:]
-    teams = sheet.worksheet('Teams').get_all_values()
+    teams = teams_sheet.get_all_values()
     names = [player[0] for player in players]
     if player_name not in names:
         await ctx.send('Not a valid player, here is a list')
@@ -298,7 +293,6 @@ def sort_func(player):
 async def stats(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
-    players_sheet = sheet.worksheet('Players')
     players = players_sheet.get_all_values()
     header = players[0]
     players = players[1:]
@@ -323,15 +317,21 @@ async def stats(ctx, *args):
 async def on_message(message):
     ctx = await client.get_context(message)
     await client.invoke(ctx)
-    if message.author == client.user or message.channel.id != 606322549139308544:
-        return
-    emoji = '💪🏿'
-    await message.add_reaction(emoji)
+    if message.channel.id == 606322549139308544:
+        emoji = '💪🏿'
+        await message.add_reaction(emoji)
+    # emoji_ids = re.findall(r'<:\w*:\d*>', message.content)
+    # emoji_ids = [int(e.split(':')[1].replace('>', '')) for e in emoji_ids]
+    
 
 @client.command()
 @commands.has_role('Oracle')
 async def kill(ctx):
     await client.logout()
+
+@client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
 
 @client.event
 async def on_command_error(ctx, error):
