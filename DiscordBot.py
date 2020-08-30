@@ -321,7 +321,7 @@ async def bedwars_stats(ctx, *args):
 async def stats(ctx, *args):
     output_string = ''
     all_data = emojis_sheet.get_all_values()[1:]
-    all_data.sort(key=lambda x: x[1], reverse=True)
+    all_data.sort(key=lambda x: int(x[1]), reverse=True)
     args = list(args)
     if len(args) == 1:
         arg = args[0]
