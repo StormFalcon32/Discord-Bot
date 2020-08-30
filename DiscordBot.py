@@ -16,6 +16,8 @@ sheet = sheets_client.open('Discord')
 text_sheet = sheet.worksheet('Text')
 teams_sheet = sheet.worksheet('Teams')
 players_sheet = sheet.worksheet('Players')
+emojis_sheet = sheet.worksheet('Emojis')
+user_emojis_sheet = sheet.worksheet('UserEmojis')
 
 client = commands.Bot(command_prefix='!')
 
@@ -27,6 +29,8 @@ draft_pool = []
 caps_pool = []
 draft_teams = [[], []]
 current_team = 0
+
+autorole = 'Herald'
 
 @client.command()
 async def save_text(ctx, *args):
@@ -290,7 +294,7 @@ def sort_func(player):
     return 100 * float(win_loss) + wins
 
 @client.command()
-async def stats(ctx, *args):
+async def bedwars_stats(ctx, *args):
     args = [word.lower().capitalize() for word in args]
     player_name = ' '.join(args)
     players = players_sheet.get_all_values()
@@ -311,18 +315,121 @@ async def stats(ctx, *args):
         player_stats.insert(0, header)
         await ctx.send('```{}```'.format(tabulate(player_stats, headers='firstrow')))
     else: 
-        await ctx.send('Use a valid name or just do !stats for the full list')
+        await ctx.send('Use a valid name or just do !bedwars_stats for the full list')
+
+@client.command()
+async def stats(ctx, *args):
+    output_string = ''
+    all_data = emojis_sheet.get_all_values()[1:]
+    all_data.sort(key=lambda x: x[1], reverse=True)
+    args = list(args)
+    if len(args) == 1:
+        arg = args[0]
+        try:
+            # this is a number
+            top_x = int(arg)
+        except ValueError:
+            # this is either an emoji or something else
+            try:
+                emoji_id = str(int(arg.split(':')[2].replace('>', '')))
+            except ValueError:
+                await ctx.send('Either do !stats x, !stats x y, or !stats custom_emoji')
+                return
+    else:
+        try:
+            lower_bound = int(args[0])
+            upper_bound = int(args[1])
+        except ValueError:
+            await ctx.send('Either do !stats x, !stats x y, or !stats emoji')
+            return
+    ids = [row[0] for row in all_data]
+    if 'top_x' in locals():
+        for ind in range(min(top_x, len(all_data))):
+            emoji_id = all_data[ind][0]
+            emoji_usage = all_data[ind][1]
+            output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + emoji_usage
+            if ind != min(top_x, len(all_data)) - 1:
+                output_string += ' ,'
+        await ctx.send(output_string)
+    elif 'lower_bound' in locals():
+        for ind in range(lower_bound, min(upper_bound, len(all_data))):
+            emoji_id = all_data[ind][0]
+            emoji_usage = all_data[ind][1]
+            output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + emoji_usage
+            if ind != min(upper_bound, len(all_data)) - 1:
+                output_string += ' ,'
+        await ctx.send(output_string)
+    elif 'emoji_id' in locals() and emoji_id in ids:
+        for ind in range(len(ids)):
+            if emoji_id == ids[ind]:
+                await ctx.send(str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + all_data[ind][1])
+    else:
+        await ctx.send('Either do !stats x, !stats x y, or !stats custom_emoji. Your emoji might not have been used yet')
 
 @client.event
 async def on_message(message):
+    if message.author == client.user:
+        return
     ctx = await client.get_context(message)
     await client.invoke(ctx)
     if message.channel.id == 606322549139308544:
         emoji = '💪🏿'
         await message.add_reaction(emoji)
-    # emoji_ids = re.findall(r'<:\w*:\d*>', message.content)
-    # emoji_ids = [int(e.split(':')[1].replace('>', '')) for e in emoji_ids]
-    
+    emoji_ids_list = re.findall(r'<:\w*:\d*>', message.content)
+    emoji_ids_list = [int(e.split(':')[2].replace('>', '')) for e in emoji_ids_list]
+    emoji_ids = {}
+    for emoji_id in emoji_ids_list:
+        emoji_id = str(emoji_id)
+        if emoji_id not in emoji_ids:
+            emoji_ids[emoji_id] = 0
+        emoji_ids[emoji_id] += 1
+    all_data = emojis_sheet.get_all_values()[1:]
+    ids = [row[0] for row in all_data]
+    row = 2
+    for emoji_id in ids:
+        if emoji_id in emoji_ids:
+            emojis_sheet.update_cell(row, 2, int(all_data[row - 2][1]) + emoji_ids[emoji_id])
+            # await ctx.send('{} is now at {}'.format(str(get(message.guild.emojis, id=int(emoji_id))), int(all_data[row - 2][1]) + emoji_ids[emoji_id]))
+        row += 1
+    for emoji_id in emoji_ids:
+        if emoji_id not in ids:
+            emojis_sheet.append_row([emoji_id, emoji_ids[emoji_id]])
+            # await ctx.send('Added {} to leaderboard'.format(str(get(message.guild.emojis, id=int(emoji_id)))))
+
+@client.event
+async def on_reaction_add(reaction, user):
+    if reaction.me:
+        return
+    # ctx = await client.get_context(reaction.message)
+    emoji = reaction.emoji
+    emoji_id = str(emoji.id)
+    all_data = emojis_sheet.get_all_values()[1:]
+    ids = [row[0] for row in all_data]
+    row = 2
+    for emoji_id_saved in ids:
+        if emoji_id == emoji_id_saved:
+            emojis_sheet.update_cell(row, 2, int(all_data[row - 2][1]) + 1)
+            # await ctx.send('{} is now at {}'.format(str(emoji), int(all_data[row - 2][1]) + 1))
+        row += 1
+    if emoji_id not in ids:
+        emojis_sheet.append_row([emoji_id, 1])
+        # await ctx.send('Added {} to leaderboard'.format(str(emoji)))
+
+@client.event
+async def on_reaction_remove(reaction, user):
+    if reaction.me:
+        return
+    # ctx = await client.get_context(reaction.message)
+    emoji = reaction.emoji
+    emoji_id = str(emoji.id)
+    all_data = emojis_sheet.get_all_values()[1:]
+    ids = [row[0] for row in all_data]
+    row = 2
+    for emoji_id_saved in ids:
+        if emoji_id == emoji_id_saved:
+            emojis_sheet.update_cell(row, 2, int(all_data[row - 2][1]) - 1)
+            # await ctx.send('{} is now at {}'.format(str(emoji), int(all_data[row - 2][1]) - 1))
+        row += 1
 
 @client.command()
 @commands.has_role('Oracle')
@@ -343,7 +450,7 @@ async def on_command_error(ctx, error):
 @client.event
 async def on_member_join(member):
     print('{} has joined'.format(member))
-    role = get(member.guild.roles, name='Herald')
+    role = get(member.guild.roles, name=autorole)
     await member.add_roles(role)
     await member.send('Welcome! You are a herald, so you only have voice chat permissions. If you are not a stranger, PM someone to get more permissions.')
 
