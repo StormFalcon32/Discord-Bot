@@ -407,6 +407,9 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     if reaction.me:
         return
+    if not reaction.custom_emoji:
+        print('Not custom emoji')
+        return
     # ctx = await client.get_context(reaction.message)
     # if reaction.message.channel.id != 599026165767864344:
     #     return
@@ -430,6 +433,9 @@ async def on_reaction_add(reaction, user):
 @client.event
 async def on_reaction_remove(reaction, user):
     if reaction.me:
+        return
+    if not reaction.custom_emoji:
+        print('Not custom emoji')
         return
     # ctx = await client.get_context(reaction.message)
     # if reaction.message.channel.id != 599026165767864344:
