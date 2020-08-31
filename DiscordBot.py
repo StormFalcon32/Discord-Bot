@@ -32,6 +32,8 @@ current_team = 0
 
 autorole = 'Herald'
 
+server_emoji_list = set()
+
 @client.command()
 async def save_text(ctx, *args):
     author_id = str(ctx.message.author.id)
@@ -368,6 +370,8 @@ async def stats(ctx, *args):
 
 @client.event
 async def on_message(message):
+    # if message.channel.id != 599026165767864344:
+    #     return
     if message.author == client.user:
         return
     ctx = await client.get_context(message)
@@ -380,6 +384,9 @@ async def on_message(message):
     emoji_ids = {}
     for emoji_id in emoji_ids_list:
         emoji_id = str(emoji_id)
+        if emoji_id not in server_emoji_list:
+            print('Not an emoji in this server')
+            continue
         if emoji_id not in emoji_ids:
             emoji_ids[emoji_id] = 0
         emoji_ids[emoji_id] += 1
@@ -400,7 +407,12 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     if reaction.me:
         return
+    if reaction.emoji.id not in server_emoji_list:
+        print('Not an emoji in this server')
+        return
     # ctx = await client.get_context(reaction.message)
+    # if reaction.message.channel.id != 599026165767864344:
+    #     return
     emoji = reaction.emoji
     emoji_id = str(emoji.id)
     all_data = emojis_sheet.get_all_values()[1:]
@@ -419,7 +431,12 @@ async def on_reaction_add(reaction, user):
 async def on_reaction_remove(reaction, user):
     if reaction.me:
         return
+    if reaction.emoji.id not in server_emoji_list:
+        print('Not an emoji in this server')
+        return
     # ctx = await client.get_context(reaction.message)
+    # if reaction.message.channel.id != 599026165767864344:
+    #     return
     emoji = reaction.emoji
     emoji_id = str(emoji.id)
     all_data = emojis_sheet.get_all_values()[1:]
@@ -431,6 +448,23 @@ async def on_reaction_remove(reaction, user):
             # await ctx.send('{} is now at {}'.format(str(emoji), int(all_data[row - 2][1]) - 1))
         row += 1
 
+@client.event
+async def on_guild_emojis_update(guild, before, after):
+    before_set = set(before)
+    after_set = set(after)
+    deleted = before_set - after_set
+    deleted_ids = set()
+    for deleted_emoji in deleted:
+        deleted_ids.add(str(deleted_emoji.id))
+    all_data = emojis_sheet.get_all_values()[1:]
+    ids = [row[0] for row in all_data]
+    row = 2
+    for emoji_id in ids:
+        if emoji_id in deleted_ids:
+            emojis_sheet.delete_row(row)
+        row += 1
+
+
 @client.command()
 @commands.has_role('Oracle')
 async def kill(ctx):
@@ -438,7 +472,10 @@ async def kill(ctx):
 
 @client.event
 async def on_ready():
+    global server_emoji_list
     print('We have logged in as {0.user}'.format(client))
+    for emoji in client.guilds[0].emojis:
+        server_emoji_list.add(str(emoji.id))
 
 @client.event
 async def on_command_error(ctx, error):
