@@ -407,14 +407,14 @@ async def on_message(message):
 async def on_reaction_add(reaction, user):
     if reaction.me:
         return
-    if reaction.emoji.id not in server_emoji_list:
-        print('Not an emoji in this server')
-        return
     # ctx = await client.get_context(reaction.message)
     # if reaction.message.channel.id != 599026165767864344:
     #     return
     emoji = reaction.emoji
     emoji_id = str(emoji.id)
+    if emoji_id not in server_emoji_list:
+        print('Not an emoji in this server')
+        return
     all_data = emojis_sheet.get_all_values()[1:]
     ids = [row[0] for row in all_data]
     row = 2
@@ -431,14 +431,14 @@ async def on_reaction_add(reaction, user):
 async def on_reaction_remove(reaction, user):
     if reaction.me:
         return
-    if reaction.emoji.id not in server_emoji_list:
-        print('Not an emoji in this server')
-        return
     # ctx = await client.get_context(reaction.message)
     # if reaction.message.channel.id != 599026165767864344:
     #     return
     emoji = reaction.emoji
     emoji_id = str(emoji.id)
+    if emoji_id not in server_emoji_list:
+        print('Not an emoji in this server')
+        return
     all_data = emojis_sheet.get_all_values()[1:]
     ids = [row[0] for row in all_data]
     row = 2
