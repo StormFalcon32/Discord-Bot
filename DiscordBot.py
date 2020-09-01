@@ -456,12 +456,16 @@ async def on_reaction_remove(reaction, user):
 
 @client.event
 async def on_guild_emojis_update(guild, before, after):
+    global server_emoji_list
     before_set = set(before)
     after_set = set(after)
     deleted = before_set - after_set
+    added = after_set - before_set
     deleted_ids = set()
     for deleted_emoji in deleted:
         deleted_ids.add(str(deleted_emoji.id))
+    for added_emoji in added:
+        server_emoji_list.add(str(added_emoji.id))
     all_data = emojis_sheet.get_all_values()[1:]
     ids = [row[0] for row in all_data]
     row = 2
