@@ -346,7 +346,10 @@ async def stats(ctx, *args):
             return
     ids = [row[0] for row in all_data]
     if 'top_x' in locals():
-        for ind in range(min(top_x, len(all_data))):
+        iterate_range = range(min(top_x, len(all_data)))
+        if top_x < 0:
+            iterate_range = range(max(0, len(all_data) + top_x), len(all_data))
+        for ind in iterate_range:
             emoji_id = all_data[ind][0]
             emoji_usage = all_data[ind][1]
             output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + emoji_usage
@@ -354,6 +357,10 @@ async def stats(ctx, *args):
                 output_string += ' ,'
         await ctx.send(output_string)
     elif 'lower_bound' in locals():
+        if lower_bound < 0:
+            lower_bound = max(0, len(all_data) + lower_bound)
+        if upper_bound < 0:
+            upper_bound = max(0, len(all_data) + upper_bound + 1)
         for ind in range(lower_bound, min(upper_bound, len(all_data))):
             emoji_id = all_data[ind][0]
             emoji_usage = all_data[ind][1]
