@@ -402,7 +402,12 @@ async def on_message(message):
     row = 2
     for emoji_id in ids:
         if emoji_id in emoji_ids:
-            emojis_sheet.update_cell(row, 2, int(all_data[row - 2][1]) + emoji_ids[emoji_id])
+            emoji_count_before = int(all_data[row - 2][1])
+            emojis_sheet.update_cell(row, 2, emoji_count_before + emoji_ids[emoji_id])
+            for _ in range(emoji_ids[emoji_id]):
+                emoji_count_before += 1
+                if emoji_count_before % 1000 == 0 or emoji_count_before == 69 or emoji_count_before == 420 or emoji_count_before == 42069:
+                    await ctx.send('{} has hit {} thanks to {}'.format(str(get(message.guild.emojis, id=int(emoji_id))), emoji_count_before, message.author.mention))
             # await ctx.send('{} is now at {}'.format(str(get(message.guild.emojis, id=int(emoji_id))), int(all_data[row - 2][1]) + emoji_ids[emoji_id]))
         row += 1
     for emoji_id in emoji_ids:
@@ -425,12 +430,16 @@ async def on_reaction_add(reaction, user):
     if emoji_id not in server_emoji_list:
         print('Not an emoji in this server')
         return
+    ctx = await client.get_context(reaction.message)
     all_data = emojis_sheet.get_all_values()[1:]
     ids = [row[0] for row in all_data]
     row = 2
     for emoji_id_saved in ids:
         if emoji_id == emoji_id_saved:
-            emojis_sheet.update_cell(row, 2, int(all_data[row - 2][1]) + 1)
+            emoji_count = int(all_data[row - 2][1]) + 1
+            emojis_sheet.update_cell(row, 2, emoji_count)
+            if emoji_count % 1000 == 0 or emoji_count == 69 or emoji_count == 420 or emoji_count == 42069:
+                await ctx.send('{} has hit {} thanks to {}'.format(str(emoji), emoji_count, user.mention))
             # await ctx.send('{} is now at {}'.format(str(emoji), int(all_data[row - 2][1]) + 1))
         row += 1
     if emoji_id not in ids:
