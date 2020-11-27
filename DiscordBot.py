@@ -1,5 +1,6 @@
 import random
 import re
+import sys
 
 import discord
 import gspread
@@ -421,6 +422,7 @@ async def on_message(message):
         if emoji_id not in ids:
             emojis_sheet.append_row([emoji_id, emoji_ids[emoji_id]])
             # await ctx.send('Added {} to leaderboard'.format(str(get(message.guild.emojis, id=int(emoji_id)))))
+    sys.stdout.flush()
 
 @client.event
 async def on_reaction_add(reaction, user):
