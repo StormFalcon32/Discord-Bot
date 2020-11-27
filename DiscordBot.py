@@ -19,7 +19,10 @@ players_sheet = sheet.worksheet('Players')
 emojis_sheet = sheet.worksheet('Emojis')
 user_emojis_sheet = sheet.worksheet('UserEmojis')
 
-client = commands.Bot(command_prefix='!')
+intents = discord.Intents.default()
+intents.members = True
+
+client = commands.Bot(command_prefix='!', intents=intents)
 
 started_draft = False
 picked_caps = False
@@ -321,6 +324,10 @@ async def bedwars_stats(ctx, *args):
 
 @client.command()
 async def stats(ctx, *args):
+    top_x = 0
+    lower_bound = 0
+    upper_bound = 0
+    emoji_id = ''
     output_string = ''
     all_data = emojis_sheet.get_all_values()[1:]
     all_data.sort(key=lambda x: int(x[1]), reverse=True)
@@ -467,6 +474,7 @@ async def on_reaction_remove(reaction, user):
     for emoji_id_saved in ids:
         if emoji_id == emoji_id_saved:
             emojis_sheet.update_cell(row, 2, int(all_data[row - 2][1]) - 1)
+            break
             # await ctx.send('{} is now at {}'.format(str(emoji), int(all_data[row - 2][1]) - 1))
         row += 1
 
