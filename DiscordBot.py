@@ -360,9 +360,9 @@ async def stats(ctx, *args):
         for ind in iterate_range:
             emoji_id = all_data[ind][0]
             emoji_usage = all_data[ind][1]
-            output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + emoji_usage
+            output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' ' + emoji_usage
             if ind != min(top_x, len(all_data)) - 1:
-                output_string += ' ,'
+                output_string += ', '
         await ctx.send(output_string)
     elif 'lower_bound' in locals():
         if lower_bound < 0:
@@ -372,14 +372,14 @@ async def stats(ctx, *args):
         for ind in range(lower_bound, min(upper_bound, len(all_data))):
             emoji_id = all_data[ind][0]
             emoji_usage = all_data[ind][1]
-            output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + emoji_usage
+            output_string += str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' ' + emoji_usage
             if ind != min(upper_bound, len(all_data)) - 1:
-                output_string += ' ,'
+                output_string += ', '
         await ctx.send(output_string)
     elif 'emoji_id' in locals() and emoji_id in ids:
         for ind in range(len(ids)):
             if emoji_id == ids[ind]:
-                await ctx.send(str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' : ' + all_data[ind][1])
+                await ctx.send(str(get(ctx.message.guild.emojis, id=int(emoji_id))) + ' ' + all_data[ind][1])
     else:
         await ctx.send('Either do !stats x, !stats x y, or !stats custom_emoji. Your emoji might not have been used yet')
 
