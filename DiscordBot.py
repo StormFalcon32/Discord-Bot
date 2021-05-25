@@ -34,6 +34,9 @@ caps_pool = []
 draft_teams = [[], []]
 current_team = 0
 
+pog_ids = [788792275328565248, 769327425439924228, 769330678755754047]
+triste_ids = [766027635989807126, 766027658080944188, 770650011984723999, 760128553097363517, 766047068061040681, 766047576755011626, 760128565634269184, 811279521826996245, 765635706499760169, 764146528070664222, 766028947644350465, 765279261988093992, 766028544480116767, 641465666972680202]
+feliz_ids = [768997991930658867, 760570603325096006, 824794435115810856, 764512347645542463, 765637547476779079, 740940490869833832, 801073749620949052]
 autorole = 'Herald'
 
 server_emoji_list = set()
@@ -423,6 +426,20 @@ async def on_message(message):
             emojis_sheet.append_row([emoji_id, emoji_ids[emoji_id]])
             # await ctx.send('Added {} to leaderboard'.format(str(get(message.guild.emojis, id=int(emoji_id)))))
     sys.stdout.flush()
+    if message.reference:
+        if message.content.lower() == 'pogwall':
+            reference_message = await message.channel.fetch_message(message.reference.message_id)
+            for pog_id in pog_ids:
+                await reference_message.add_reaction(get(message.guild.emojis, id=int(pog_id)))
+        if message.content.lower() == 'tristewall':
+            reference_message = await message.channel.fetch_message(message.reference.message_id)
+            for triste_id in triste_ids:
+                await reference_message.add_reaction(get(message.guild.emojis, id=int(triste_id)))
+        if message.content.lower() == 'felizwall':
+            reference_message = await message.channel.fetch_message(message.reference.message_id)
+            for feliz_id in feliz_ids:
+                await reference_message.add_reaction(get(message.guild.emojis, id=int(feliz_id)))
+
 
 @client.event
 async def on_reaction_add(reaction, user):
